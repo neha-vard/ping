@@ -1,20 +1,20 @@
-import random
-import time
-
-LABELS = ["Neha", "Anya", "Priyanka", "Vy", "unknown"]
+import os
+from deepface import DeepFace
 
 def predict(img_path):
-    """Simulates model prediction by randomly selecting a label."""
+    """Model prediction using DeepFace Facenet model."""
     print(f"Simulating prediction for: {img_path}")
-    time.sleep(1)  # Simulate model inference delay
-    prediction = random.choice(LABELS)  # Pick a random label
-    print(f"Prediction: {prediction}")
-    return prediction
+    data_dir = "known_people_dataset"
+    results = DeepFace.find(img_path=img_path, db_path=data_dir, model_name='Facenet')
 
-def register(img_path):
-    """Simulate the registration of a new image (e.g., add to model, database, etc.)."""
-    print(f"Registering image: {img_path}")
-    
-    # You can add logic here to process the image or update your model
-    # For now, we just return a success message
-    return f"Image registered successfully: {img_path}"
+    if results and not results[0].empty:
+        top_match = results[0].iloc[0]
+        match_path = top_match["identity"]
+        person_name = os.path.basename(os.path.dirname(match_path))
+        if float(top_match["distance"]) < 0.4:
+            print(f"Prediction: {person_name}")
+            return person_name
+        else:
+            return "No matches found."
+    else:
+        return "No matches found."

@@ -6,24 +6,36 @@ const socket = io("http://localhost:5000");
 
 function App() {
     const [alert, setAlert] = useState(null);
-    const [imagePath, setImagePath] = useState("");
+    const [file, setFile] = useState(null);
+    const [name, setName] = useState("");
     const [registrationResult, setRegistrationResult] = useState(null);
 
-    // Handle the text input for the image path
-    const handleImagePathChange = (e) => {
-        setImagePath(e.target.value);
-    };
-
-    // Handle sending the image path to the backend
-    const handleImageSubmit = () => {
-        if (imagePath) {
-            // Send the image path to backend using Socket.IO
-            socket.emit("upload_image", { imagePath });
-            console.log("Image path sent:", imagePath);
-        } else {
-            alert("Please enter an image path.");
+    // Handle image + name uploads
+    const handleFileChange = (e) => {
+        const selectedFile = e.target.files[0];
+        if (selectedFile) {
+            setFile(selectedFile);
         }
     };
+
+    const handleImageSubmit = () => {
+        if (!file || !name) {
+            alert("Please select a file and enter a name.");
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            const base64Data = reader.result.split(',')[1];
+            socket.emit("upload_image_bytes", {
+                name,
+                imageData: base64Data
+            });
+            console.log("Image data sent");
+        };
+        reader.readAsDataURL(file);
+    };
+
 
     // Listen for visitor alerts
     useEffect(() => {
@@ -48,16 +60,20 @@ function App() {
         <div>
             <h1>Ping Security System</h1>
             {alert && <p style={{ color: "red" }}>{alert}</p>}
-            
-            <input
-                type="text"
-                value={imagePath}
-                onChange={handleImagePathChange}
-                placeholder="Enter image path"
-            />
-            <button onClick={handleImageSubmit}>Submit Image Path</button>
 
             {registrationResult && <p style={{ color: "green" }}>{registrationResult}</p>}
+            <input
+                type="file"
+                accept="image/*"
+                onChange={handleFileChange}
+            />
+            <input
+                type="text"
+                value={name}
+                onChange={(e) => {setName(e.target.value)}}
+                placeholder="Enter name to associate with image"
+            />
+            <button onClick={handleImageSubmit}>Submit Image</button>
         </div>
     );
 }
