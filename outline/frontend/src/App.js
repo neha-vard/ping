@@ -138,7 +138,7 @@ function App() {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {visitorLog.map((entry, index) => (
+                                    {[...visitorLog].reverse().map((entry, index) => (
                                     <tr key={index}>
                                         <td>{entry.timestamp}</td>
                                         <td>{entry.message}</td>
