@@ -10,12 +10,11 @@ import os
 import random
 import time
 from pathlib import Path
-import cv2
 
 from socketio import Client
 
 # --- your helpers -----------------------------------------------------------
-from detect import detect_face, detect_person
+from preprocess import process_face_image, detect_and_crop_person
 from known_model import predict
 from unknown_model import predict_person
 
@@ -27,21 +26,8 @@ except ImportError:
 # ---------------------------------------------------------------------------
 
 
-def save_image(image: "ndarray", directory: str, prefix: str) -> str:
-    """Saves an image to the specified directory with a timestamp-based filename."""
-    if image is not None and image.size > 0:
-        os.makedirs(directory, exist_ok=True)
-        timestamp = int(time.time())
-        filename = f"{prefix}_{timestamp}.jpg"
-        filepath = os.path.join(directory, filename)
-        cv2.imwrite(filepath, image)
-        print(f"Saved image: {filepath}")
-        return filepath
-    return ""
-
-# Function to grab one frame from PiCamera2 and save it
 def get_frame_live() -> "ndarray | None":
-    """Grab one RGB frame from PiCamera2 and save it."""
+    """Grab one RGB frame from PiCamera2."""
     if Picamera2 is None:
         print("PiCamera2 not available on this machine.")
         return None
@@ -54,15 +40,12 @@ def get_frame_live() -> "ndarray | None":
     picam2.start()
     frame = picam2.capture_array()
     picam2.close()
+    return frame
 
-    # Save the image to a folder and return the filepath along with the image
-    if frame is not None:
-        filepath = save_image(frame, "captured_images", "live_frame")
-        return frame, filepath
-    return None, ""
 
 def get_frame_test(test_dir: Path) -> "ndarray | None":
     """Pick a random image file (jpg/png) from test_dir and load it with cv2."""
+    import cv2  # only import if we actually need it
     files = [p for p in test_dir.iterdir() if p.suffix.lower() in {".jpg", ".jpeg", ".png"}]
     if not files:
         print(f"No test images found in {test_dir}")
@@ -75,7 +58,7 @@ def get_frame_test(test_dir: Path) -> "ndarray | None":
 def main(test_mode: bool, test_dir: Path):
     # --- connect socket -----------------------------------------------------
     socket = Client()
-    socket.connect("http://localhost:8080")
+    socket.connect("http://localhost:5000")
 
     get_frame = get_frame_test if test_mode else get_frame_live
 
@@ -86,8 +69,10 @@ def main(test_mode: bool, test_dir: Path):
             continue
 
         # ---------- Face pipeline -------------------------------------------
-        if detect_face(image) != -1:
-            result = predict(img_path)
+        # face_path = process_face_image(image)
+        face_path = img_path
+        if face_path:
+            result = predict(face_path)
             if result != "No matches found.":
                 msg = f"{result} is at the door!"
                 socket.emit("alert", {"message": msg})
@@ -96,8 +81,9 @@ def main(test_mode: bool, test_dir: Path):
                 continue
 
         # ---------- Person / occupation pipeline ---------------------------
-        if detect_person(image):
-            occ = predict_person(img_path)
+        person_path = detect_and_crop_person(image)
+        if person_path:
+            occ = predict_person(person_path)
             if occ != "unknown":
                 msg = f"Unknown visitor! Identified as a {occ}."
                 socket.emit("alert", {"message": msg})
