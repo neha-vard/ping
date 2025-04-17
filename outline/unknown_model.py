@@ -10,5 +10,5 @@ def predict_person(img_path):
     time.sleep(1)  # Simulate model inference delay
     prediction = random.choice(LABELS)  # Pick a random label
     print(f"Prediction: {prediction}")
-    os.remove(img_path)
+    # os.remove(img_path)
     return prediction

@@ -52,7 +52,7 @@ def get_frame_test(test_dir: Path) -> "ndarray | None":
         return None
     img_path = random.choice(files)
     print(f"[TEST MODE] Using {img_path}")
-    return cv2.imread(str(img_path))  # returns ndarray (BGR)
+    return img_path, cv2.imread(str(img_path))  # returns ndarray (BGR)
 
 
 def main(test_mode: bool, test_dir: Path):
@@ -63,13 +63,14 @@ def main(test_mode: bool, test_dir: Path):
     get_frame = get_frame_test if test_mode else get_frame_live
 
     while True:
-        image = get_frame(test_dir) if test_mode else get_frame()
+        img_path, image = get_frame(test_dir) if test_mode else get_frame()
         if image is None:
             time.sleep(5)
             continue
 
         # ---------- Face pipeline -------------------------------------------
-        face_path = process_face_image(image)
+        # face_path = process_face_image(image)
+        face_path = img_path
         if face_path:
             result = predict(face_path)
             if result != "No matches found.":
