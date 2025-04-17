@@ -38,6 +38,6 @@ def predict_person(img_path):
         print(f"{label}: {predictions[i]*100:.2f}%")
     print(f"Final Prediction: {prediction}")
 
-    # os.remove(img_path)
+    os.remove(img_path)
     return prediction
   
