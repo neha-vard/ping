@@ -5,7 +5,7 @@ def predict(img_path):
     """Model prediction using DeepFace ArcFace model."""
     print(f"Simulating prediction for: {img_path}")
     data_dir = "known_people_dataset"
-    results = DeepFace.find(img_path=img_path, db_path=data_dir, model_name='ArcFace')
+    results = DeepFace.find(img_path=img_path, db_path=data_dir, model_name='Facenet')
     # os.remove(img_path)
 
     if results and not results[0].empty:
