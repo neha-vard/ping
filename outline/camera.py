@@ -87,7 +87,7 @@ def main(test_mode: bool, test_dir: Path):
             continue
 
         # ---------- Face pipeline -------------------------------------------
-        if detect_face(image):
+        if detect_face(image) != -1:
             result = predict(img_path)
             if result != "No matches found.":
                 msg = f"{result} is at the door!"
