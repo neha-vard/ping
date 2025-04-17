@@ -63,7 +63,6 @@ def get_frame_live() -> "ndarray | None":
 
 def get_frame_test(test_dir: Path) -> "ndarray | None":
     """Pick a random image file (jpg/png) from test_dir and load it with cv2."""
-    import cv2  # only import if we actually need it
     files = [p for p in test_dir.iterdir() if p.suffix.lower() in {".jpg", ".jpeg", ".png"}]
     if not files:
         print(f"No test images found in {test_dir}")
