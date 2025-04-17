@@ -3,7 +3,7 @@ import { io } from "socket.io-client";
 import './App.css';
 
 // Connect to the WebSocket server
-const socket = io("http://localhost:5000");
+const socket = io("http://localhost:8080");
 
 function App() {
     const [alert, setAlert] = useState(null);

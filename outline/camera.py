@@ -58,7 +58,7 @@ def get_frame_test(test_dir: Path) -> "ndarray | None":
 def main(test_mode: bool, test_dir: Path):
     # --- connect socket -----------------------------------------------------
     socket = Client()
-    socket.connect("http://localhost:5000")
+    socket.connect("http://localhost:8080")
 
     get_frame = get_frame_test if test_mode else get_frame_live
 
