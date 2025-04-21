@@ -14,6 +14,7 @@ def detect_face(image: np.ndarray) -> float:
     Returns:
         float: The confidence score if a face is detected, -1 if no face is detected.
     """
+    print(f"Image type: {type(image)}")
     rgb_image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
     mp_face_detection = mp.solutions.face_detection
