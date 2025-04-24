@@ -159,7 +159,7 @@ def main(test_mode: bool, test_dir: Path):
         recalibrate()
 
         # ---------- Person / occupation pipeline ---------------------------
-        if detect_face_confidence:
+        if detect_person(image):
             print("check image occupation")
             occ = predict_person(img_path)
             if occ != "unknown":
