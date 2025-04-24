@@ -71,10 +71,11 @@ def count_attempts(pin, duration=1.0):
 
 def is_night_time():
     """Returns True if the current time is between 1 AM and 5 AM."""
+    #BY THE WAY, THE PI IS NOT IN CST!!!! so u can j manually set it
     current_time = datetime.now()
     # print("Current system time:", current_time.strftime("%Y-%m-%d %H:%M:%S")) 
-    # return 1 <= current_time.hour < 5 
-    return True
+    return 1 <= current_time.hour < 5 
+    # return True
 
 def breakin_monitor():
     print("Starting break-in monitor...")
