@@ -1,7 +1,8 @@
 import RPi.GPIO as GPIO
 import time, math
 import threading
-from . import *
+import picar_4wd as fc
+
 
 class Speed():
     def __init__(self, pin):
@@ -70,10 +71,15 @@ def test2():
         time.sleep(0.001) 
 
 def test3():
-    speed4 = Speed(25)
+    speed4 = Speed(24)
     speed4.start()
-    # time.sleep(2)
-    fc.forward(100)
+    time.sleep(2)
+    # fc.forward(100)
+
+    while True:
+        print(GPIO.input(24))  # Check if the GPIO pin is reading 0 or 1
+        time.sleep(0.1)
+
     x = 0
     for i in range(20):
         time.sleep(0.1)
@@ -82,7 +88,7 @@ def test3():
         print("%smm/s"%speed)
     print("%smm"%x)
     speed4.deinit()
-    fc.stop()
+    # fc.stop()
 if __name__ == "__main__":
     test3()
         
