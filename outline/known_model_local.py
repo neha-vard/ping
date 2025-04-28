@@ -3,7 +3,7 @@ from deepface import DeepFace
 
 def predict(img_path):
     """Model prediction using DeepFace Facenet model."""
-    print(f"Simulating prediction for: {img_path}")
+    print(f"Prediction for: {img_path}")
     data_dir = "known_people_dataset"
     results = DeepFace.find(img_path=img_path, db_path=data_dir, model_name='Facenet', enforce_detection=False)
     # os.remove(img_path)

@@ -53,7 +53,7 @@ class Speed():
 socket = Client()
 socket.connect("http://localhost:8080")
 
-def count_attempts(pin, duration=1.0):
+def count_attempts(pin, duration=2.0):
     """Count how many times the signal flips in a given duration (seconds)."""
     start_time = time.time()
     last_value = GPIO.input(pin)
@@ -92,7 +92,7 @@ def breakin_monitor():
         if reading != last_reading:
             print("Sensor interrupted!")
 
-            attempts = count_attempts(PHOTO_SENSOR_PIN, duration=1.0)
+            attempts = count_attempts(PHOTO_SENSOR_PIN, duration=2.0)
             print(f"attempts in 1s: {attempts}")
 
             if attempts > 8:
