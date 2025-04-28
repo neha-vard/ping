@@ -10,6 +10,7 @@ import random
 import time
 from pathlib import Path
 import cv2
+import asyncio
 
 from socketio import Client
 
@@ -86,7 +87,7 @@ def main(test_mode: bool, test_dir: Path):
 
         # ---------- Face pipeline -------------------------------------------
         if detect_face(image) != -1:
-            result = predict(img_path)
+            result = asyncio.run(predict(img_path))
             if result != "No matches found.":
                 msg = f"{result} is at the door!"
                 socket.emit("alert", {"message": msg})

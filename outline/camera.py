@@ -14,6 +14,7 @@ import cv2
 import picar_4wd as fc
 
 from socketio import Client
+import asyncio
 
 # --- your helpers -----------------------------------------------------------
 from detect import detect_face, detect_person
@@ -32,6 +33,27 @@ except ImportError as e:
     print(f"[ImportError] could not load Picamera2: {e}")
     Picamera2 = None          # Avoid import error on non‑Pi dev machines
 
+def brighten_image_adaptive(image: "ndarray", target_brightness: float = 130.0) -> "ndarray":
+    """
+    Brightens the image adaptively so that its average brightness reaches the target.
+    - target_brightness: float between 0–255 (typical midtone target: 120–150)
+    """
+    if image is None:
+        return None
+
+    # Convert to grayscale to compute brightness
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    mean_brightness = gray.mean()
+
+    # If already bright enough, return original
+    if mean_brightness >= target_brightness:
+        return image
+
+    # Scale factor (limited to avoid overexposure)
+    factor = min(target_brightness / mean_brightness, 2.0)
+
+    # Adjust brightness using convertScaleAbs
+    return cv2.convertScaleAbs(image, alpha=factor, beta=0)
 
 def save_image(image: "ndarray", directory: str, prefix: str) -> str:
     """Saves an image to the specified directory with a timestamp-based filename."""
@@ -63,6 +85,7 @@ def get_frame_live() -> "ndarray | None":
 
     # Save the image to a folder and return the filepath along with the image
     if frame is not None:
+        frame = cv2.rotate(frame, cv2.ROTATE_90_COUNTERCLOCKWISE)
         filepath = save_image(frame, "captured_images", "live_frame")
         print("returning proper image to program")
         return filepath, frame
@@ -126,16 +149,6 @@ def main(test_mode: bool, test_dir: Path):
         print(detect_face_confidence)
 
         # ---------- Face pipeline -------------------------------------------
-        # if detect_face(image) != -1:
-        #     print("check image against known people")
-        #     result = predict(img_path)
-        #     if result != "No matches found.":
-        #         msg = f"{result} is at the door!"
-        #         socket.emit("alert", {"message": msg})
-        #         print("Alert sent:", msg)
-        #         time.sleep(10)
-        #         continue
-
         while detect_face_confidence == -1 or detect_face_confidence < 0.65:
             if calibrating_up:
                 calibrate_upwards()
@@ -155,8 +168,19 @@ def main(test_mode: bool, test_dir: Path):
             img_path, image = get_frame(test_dir) if test_mode else get_frame()
             detect_face_confidence = detect_face(image)
             print(detect_face_confidence)
+            time.sleep(2)
         
         recalibrate()
+
+        print("check image against known people")
+        img_bright = brighten_image_adaptive(image)
+        img_bright_path = save_image(img_bright, "brightened_images", "brightened")
+        result = asyncio.run(predict(img_bright_path))
+        if result != "No matches found.":
+            msg = f"{result} is at the door!"
+            socket.emit("alert", {"message": msg})
+            print("Alert sent:", msg)
+            continue
 
         # ---------- Person / occupation pipeline ---------------------------
         if detect_person(image):
@@ -166,13 +190,11 @@ def main(test_mode: bool, test_dir: Path):
                 msg = f"Unknown visitor! Identified as a {occ}."
                 socket.emit("alert", {"message": msg})
                 print("Alert sent:", msg)
-                time.sleep(5)
                 continue
 
         # ---------- Fallback ------------------------------------------------
         socket.emit("alert", {"message": "Unknown visitor!"})
         print("Alert sent: Unknown visitor!")
-        time.sleep(5)
 
 
 if __name__ == "__main__":
