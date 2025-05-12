@@ -1,10 +1,3 @@
-#!/usr/bin/env python3
-"""
-capture_and_alert.py
-  • Live mode  : grab a frame from PiCamera2 every loop
-  • Test mode  : grab a random image file from ./test-images
-"""
-
 import argparse
 import os
 import random
@@ -16,7 +9,6 @@ import picar_4wd as fc
 from socketio import Client
 import asyncio
 
-# --- your helpers -----------------------------------------------------------
 from detect import detect_face, detect_person
 from known_model import predict
 from unknown_model import predict_person
