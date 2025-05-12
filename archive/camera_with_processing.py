@@ -1,10 +1,3 @@
-#!/usr/bin/env python3
-"""
-capture_and_alert.py
-  • Live mode  : grab a frame from PiCamera2 every loop
-  • Test mode  : grab a random image file from ./test-images
-"""
-
 import argparse
 import os
 import random
@@ -13,8 +6,7 @@ from pathlib import Path
 
 from socketio import Client
 
-# --- your helpers -----------------------------------------------------------
-from preprocess import process_face_image, detect_and_crop_person
+from archive.preprocess import process_face_image, detect_and_crop_person
 from known_model import predict
 from unknown_model import predict_person
 

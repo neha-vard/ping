@@ -1,9 +1,3 @@
-#!/usr/bin/env python3
-"""
-  • Live mode  : grab a frame from PiCamera2 every loop
-  • Test mode  : grab a random image file from ./test-images
-"""
-
 import argparse
 import os
 import random
@@ -14,9 +8,8 @@ import asyncio
 
 from socketio import Client
 
-# --- your helpers -----------------------------------------------------------
 from detect import detect_face, detect_person
-from known_model_local import predict
+from archive.known_model_local import predict
 from unknown_model import predict_person
 
 # Optional (only needed in live mode)
